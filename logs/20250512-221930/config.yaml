@@ -1,0 +1,55 @@
+data:
+  test_csv: data/test_split.csv
+  train_csv: data/train_split.csv
+model:
+  categorical_dims:
+  - 7
+  - 7
+  - 2
+  - 24
+  - 2
+  - 4
+  - 2
+  - 1
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 1
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 2
+  - 13
+  - 3
+  - 4
+  - 5
+  - 7
+  - 2
+  - 2
+  - 2
+  - 2
+  - 1
+  - 1
+  - 1
+  - 2
+  - 2
+  embed_dim: 16
+  latent_dim: 32
+  num_heads: 4
+  num_layers: 2
+  num_numeric: 29
+training:
+  batch_size: 64
+  beta_kl: 1.0
+  lr: 0.001
+  num_epochs: 10
