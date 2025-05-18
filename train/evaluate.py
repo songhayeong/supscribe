@@ -4,7 +4,10 @@ import torch
 from sklearn.metrics import roc_auc_score, f1_score, accuracy_score
 from train.trainer import loss_function
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import seaborn as sns
+
+
 
 
 def evaluate(model, dataloader, device='cpu'):
@@ -38,6 +41,9 @@ def evaluate(model, dataloader, device='cpu'):
 
             # 첫 배치에 대한 시각화
             if not first_batch_done:
+                mpl.rcParams['font.family'] = 'AppleGothic'
+                mpl.rcParams['axes.unicode_minus'] = False  # 음수 기호 깨짐 방지
+
                 first_batch_done = True
                 attn_scores = model.transformer.attn_scores
                 print(f"[DEBUG] Number of layers with attn: {len(attn_scores)}")
