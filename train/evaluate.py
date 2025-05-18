@@ -3,12 +3,16 @@
 import torch
 from sklearn.metrics import roc_auc_score, f1_score, accuracy_score
 from train.trainer import loss_function
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def evaluate(model, dataloader, device='cpu'):
     model.eval()
     y_true, y_prob, y_pred = [], [], []
     total_loss, total_recon, total_cls, total_kl = 0, 0, 0, 0
+
+    first_batch_done = False
 
     with torch.no_grad():
         for x_cat, x_num, y in dataloader:
@@ -29,6 +33,28 @@ def evaluate(model, dataloader, device='cpu'):
             y_true.extend(y.cpu().numpy())
             y_prob.extend(out['y_hat'].cpu().numpy())
             y_pred.extend((out['y_hat'] > 0.5).int().cpu().numpy())
+
+            feature_names = getattr(dataloader.dataset, 'cat_cols', None)
+
+            # 첫 배치에 대한 시각화
+            if not first_batch_done:
+                first_batch_done = True
+                attn_scores = model.transformer.attn_scores
+                print(f"[DEBUG] Number of layers with attn: {len(attn_scores)}")
+
+                if attn_scores:
+                    attn = attn_scores[0]  # Layer 1
+                    print(f"[DEBUG] attn shape: {attn.shape}")  # Expect [B, H, T, T]
+                    head = attn[0, 0]  # batch 0, head 0
+
+                    plt.figure(figsize=(8, 6))
+                    sns.heatmap(head, cmap="viridis",
+                                xticklabels=feature_names if feature_names else None,
+                                yticklabels=feature_names if feature_names else None)
+                    plt.title("Attention Map: Layer 1, Head 1 (First Batch)")
+                    plt.xticks(rotation=45)
+                    plt.tight_layout()
+                    plt.show()
 
     return {
         'loss': total_loss / len(dataloader),

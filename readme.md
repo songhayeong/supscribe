@@ -6,7 +6,7 @@ This repository accompanies our research on modeling strategic treatment behavio
 
 IVF treatment decisions are often driven not only by clinical indications but also by socioeconomic factors, behavioral strategies, and latent preferences. However, prior research has largely focused on predicting IVF success using static clinical features, overlooking the structural complexity of patient choices.
 
-In this paper, we proposes a Transformer-VAE hybrid architecture to model such decision structures in a learnable latent space, enabling interpretable simulations and counterfactual analyses.
+In this paper, we propose a Transformer-VAE hybrid architecture to model such decision structures in a learnable latent space, enabling interpretable simulations and counterfactual analyses.
 
 ## Research Objective
 

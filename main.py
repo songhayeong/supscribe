@@ -57,14 +57,17 @@ optimizer = torch.optim.Adam(model.parameters(), lr=cfg['training']['lr'])
 for epoch in range(1, cfg['training']['num_epochs'] + 1):
     print(f"\nEpoch {epoch}")
     train_metrics = train_epoch(model, train_loader, optimizer, device)
-    test_metrics = evaluate(model, test_loader, device)
     print("Train:", train_metrics)
-    print("Test :", test_metrics)
 
     # Log metrics
     logger.log_metrics(epoch, train_metrics, prefix="train")
-    logger.log_metrics(epoch, test_metrics, prefix="test")
 
+# --------------------------
+# Evaluate once at the end
+print("\nEvaluating final model on test set...")
+test_metrics = evaluate(model, test_loader, device)
+print("Test:", test_metrics)
+logger.log_metrics(cfg['training']['num_epochs'], test_metrics, prefix="test")
 
 # --------------------------
 # Save summary
