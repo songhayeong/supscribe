@@ -11,6 +11,7 @@ class IVFStrategyDataset(Dataset):
     def __init__(self, csv_path):
         df = pd.read_csv(csv_path)
         df = preprocess_ivf_dataframe(df)
+        self.df = df # 시술 유형 등 메타 정보 접근용 저장
 
         label_col = '임신 성공 여부'
         if label_col not in df.columns:
