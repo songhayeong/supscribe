@@ -1,21 +1,21 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from model.transformer_block import TabTransformerBlock
-from model.vae_encoder import VAEEncoder
-from model.vae_decoder import VAEDecoder
-from model.vae_classifier import VAEClassifier
+from tabvae_model.transformer_block import TabTransformerBlock
+from tabvae_model.vae_encoder import VAEEncoder
+from tabvae_model.vae_decoder import VAEDecoder
+from tabvae_model.vae_classifier import VAEClassifier
 
 
 class TabVAEModel(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
-        cat_dims = cfg['model']['categorical_dims']
+        cat_dims = cfg['tabvae_model']['categorical_dims']
         self.num_cat = len(cat_dims)
-        self.dim_embed = cfg['model']['embed_dim']
-        self.latent_dim = cfg['model']['latent_dim']
-        self.input_dim_num = cfg['model']['num_numeric']
+        self.dim_embed = cfg['tabvae_model']['embed_dim']
+        self.latent_dim = cfg['tabvae_model']['latent_dim']
+        self.input_dim_num = cfg['tabvae_model']['num_numeric']
 
         self.cat_embeds = nn.ModuleList([
             nn.Embedding(num_cat, self.dim_embed) for num_cat in cat_dims
@@ -23,8 +23,8 @@ class TabVAEModel(nn.Module):
 
         self.transformer = TabTransformerBlock(
             dim_embed=self.dim_embed,
-            num_heads=cfg['model']['num_heads'],
-            num_layers=cfg['model']['num_layers']
+            num_heads=cfg['tabvae_model']['num_heads'],
+            num_layers=cfg['tabvae_model']['num_layers']
         )
 
         total_embed_dim = self.num_cat * self.dim_embed + self.input_dim_num

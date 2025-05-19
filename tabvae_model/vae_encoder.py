@@ -1,4 +1,4 @@
-# model/vae_encoder.py
+# tabvae_model/vae_encoder.py
 
 import torch
 import torch.nn as nn

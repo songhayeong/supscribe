@@ -1,4 +1,4 @@
-# model/custom_transformer.py
+# tabvae_model/custom_transformer.py
 
 import torch
 import torch.nn as nn

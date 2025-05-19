@@ -1,4 +1,4 @@
-# model/vae_classifier.py
+# tabvae_model/vae_classifier.py
 
 import torch
 import torch.nn as nn

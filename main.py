@@ -4,9 +4,8 @@ import yaml
 import torch
 import argparse
 from torch.utils.data import DataLoader
-from model.tab_vae import TabVAEModel
+from tabvae_model.tab_vae import TabVAEModel
 from data.dataset import IVFStrategyDataset
-from train.trainer import train_epoch
 from train.evaluate import evaluate
 from utils.logger import ExperimentLogger
 
@@ -14,6 +13,7 @@ from utils.logger import ExperimentLogger
 # Argument parsing
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=str, default='config.yaml')
+parser.add_argument('--model_type', type=str, choices=['attention', 'tabvae'], default='attention')
 args = parser.parse_args()
 
 # --------------------------
@@ -44,27 +44,59 @@ train_loader = DataLoader(train_dataset, batch_size=cfg['training']['batch_size'
 test_loader = DataLoader(test_dataset, batch_size=cfg['training']['batch_size'], shuffle=False)
 
 # --------------------------
-# Model
-model = TabVAEModel(cfg).to(device)
+# Model Selection
+if args.model_type == 'attention':
+    from attn_analysis_model.model.attention_classifier import AttentionClassifier
+    model = AttentionClassifier(
+        cat_dims=cfg['model']['categorical_dims'],
+        embed_dim=cfg['model']['embed_dim'],
+        num_heads=cfg['model']['num_heads'],
+        num_layers=cfg['model']['num_layers'],
+        num_numeric=cfg['model']['num_numeric']
+    )
+    feature_names = train_dataset.cat_cols
+
+elif args.model_type == 'tabvae':
+    from tabvae_model.tab_vae import TabVAEModel
+    model = TabVAEModel(cfg)
+    feature_names = None
+
+model = model.to(device)
+
 logger.log_model_architecture(model, "TabVAE")
 
 # --------------------------
 # Optimizer
-optimizer = torch.optim.Adam(model.parameters(), lr=cfg['training']['lr'])
+optimizer = torch.optim.AdamW(model.parameters(), lr=cfg['training']['lr'])
 
 # --------------------------
 # Training loop
-for epoch in range(1, cfg['training']['num_epochs'] + 1):
-    print(f"\nEpoch {epoch}")
-    train_metrics = train_epoch(model, train_loader, optimizer, device)
-    print("Train:", train_metrics)
+if args.model_type == 'tabvae':
+    from train.trainer import train_epoch
 
-    # Log metrics
-    logger.log_metrics(epoch, train_metrics, prefix="train")
+    for epoch in range(1, cfg['training']['num_epochs'] + 1):
+        print(f"\nEpoch {epoch}")
+        train_metrics = train_epoch(model, train_loader, optimizer, device)
+        print("Train:", train_metrics)
+
+        # Log metrics
+        logger.log_metrics(epoch, train_metrics, prefix="train")
+
+elif args.model_type == 'attention':
+    from attn_analysis_model.train.trainer import train_epoch
+
+    for epoch in range(1, cfg['training']['num_epochs'] + 1):
+        print(f"\nEpoch {epoch}")
+        train_metrics = train_epoch(model, train_loader, optimizer, device)
+        print("Train:", train_metrics)
+
+        # Log metrics
+        logger.log_metrics(epoch, train_metrics, prefix="train")
+
 
 # --------------------------
 # Evaluate once at the end
-print("\nEvaluating final model on test set...")
+print("\nEvaluating final tabvae_model on test set...")
 test_metrics = evaluate(model, test_loader, device)
 print("Test:", test_metrics)
 logger.log_metrics(cfg['training']['num_epochs'], test_metrics, prefix="test")

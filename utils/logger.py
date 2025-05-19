@@ -17,7 +17,7 @@ class ExperimentLogger:
         with open(os.path.join(self.log_dir, "config.yaml"), 'w') as f:
             yaml.dump(cfg, f)
 
-    def log_model_architecture(self, model, name="model"):
+    def log_model_architecture(self, model, name="tabvae_model"):
         with open(os.path.join(self.log_dir, f"{name}_summary.txt"), 'w') as f:
             f.write(str(model))
 
@@ -29,6 +29,6 @@ class ExperimentLogger:
         with open(os.path.join(self.log_dir, "metrics.json"), 'w') as f:
             json.dump(self.metrics, f, indent=2)
 
-    def save_checkpoint(self, model, name="model.pt"):
+    def save_checkpoint(self, model, name="tabvae_model.pt"):
         import torch
         torch.save(model.state_dict(), os.path.join(self.log_dir, name))

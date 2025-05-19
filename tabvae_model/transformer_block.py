@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from model.custom_transformer import CustomTransformerEncoderLayer
+from tabvae_model.custom_transformer import CustomTransformerEncoderLayer
 
 
 class TabTransformerBlock(nn.Module):
