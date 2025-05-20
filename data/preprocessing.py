@@ -5,6 +5,8 @@ import pandas as pd
 
 
 def preprocess_ivf_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.drop(columns='ID')
+
     """
     순수 전처리: 결측치, 형식 통일 등만 처리하고 인코딩은 하지 않음
     """

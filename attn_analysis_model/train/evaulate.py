@@ -4,6 +4,7 @@ import seaborn as sns
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 import matplotlib as mpl
 
+
 def evaluate(model, dataloader,
              device='cpu', feature_names=None):
     model.eval()
@@ -45,6 +46,17 @@ def evaluate(model, dataloader,
                 plt.xticks(rotation=90)
                 plt.tight_layout()
                 plt.show()
+
+    # 디버깅 출력
+    print("[DEBUG] y_true:", np.unique(y_true, return_counts=True))
+    print("[DEBUG] y_pred:", np.unique(y_pred, return_counts=True))
+    print("[DEBUG] probs :", y_prob[:10])
+    print("[DEBUG] logits:", logits[:10].cpu().numpy())
+
+    try:
+        auc = roc_auc_score(y_true, y_prob)
+    except ValueError:
+        auc = float('nan')
 
     return {
         'loss': total_loss / len(dataloader),

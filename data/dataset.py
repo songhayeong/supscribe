@@ -18,7 +18,7 @@ class IVFStrategyDataset(Dataset):
             raise ValueError(f"'{label_col}' 컬럼이 데이터에 존재하지 않습니다.")
 
         # 컬럼 분리
-        self.cat_cols = df.select_dtypes(include='object').columns.tolist()
+        self.cat_cols = [col for col in df.select_dtypes(include='object').columns if col != label_col]
         self.num_cols = df.select_dtypes(include='number').drop(label_col, errors='ignore').columns.tolist()
 
         # 인코더 적용

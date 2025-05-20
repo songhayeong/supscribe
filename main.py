@@ -4,9 +4,7 @@ import yaml
 import torch
 import argparse
 from torch.utils.data import DataLoader
-from tabvae_model.tab_vae import TabVAEModel
 from data.dataset import IVFStrategyDataset
-from train.evaluate import evaluate
 from utils.logger import ExperimentLogger
 
 # --------------------------
@@ -47,8 +45,11 @@ test_loader = DataLoader(test_dataset, batch_size=cfg['training']['batch_size'],
 # Model Selection
 if args.model_type == 'attention':
     from attn_analysis_model.model.attention_classifier import AttentionClassifier
+
+    cat_dims = [len(cat) for cat in train_dataset.enc.categories_]
+
     model = AttentionClassifier(
-        cat_dims=cfg['model']['categorical_dims'],
+        cat_dims=cat_dims,
         embed_dim=cfg['model']['embed_dim'],
         num_heads=cfg['model']['num_heads'],
         num_layers=cfg['model']['num_layers'],
@@ -95,11 +96,19 @@ elif args.model_type == 'attention':
 
 
 # --------------------------
-# Evaluate once at the end
-print("\nEvaluating final tabvae_model on test set...")
-test_metrics = evaluate(model, test_loader, device)
-print("Test:", test_metrics)
-logger.log_metrics(cfg['training']['num_epochs'], test_metrics, prefix="test")
+if args.model_type == 'tabvae':
+    from train.evaluate import evaluate
+    # Evaluate once at the end
+    print("\nEvaluating final tabvae_model on test set...")
+    test_metrics = evaluate(model, test_loader, device)
+    print("Test:", test_metrics)
+    logger.log_metrics(cfg['training']['num_epochs'], test_metrics, prefix="test")
+
+elif args.model_type == 'attention':
+    from attn_analysis_model.train.evaulate import evaluate
+    feature_names = train_dataset.cat_cols
+    test_metrics = evaluate(model, test_loader, device, feature_names=feature_names)
+    print("Test:", test_metrics)
 
 # --------------------------
 # Save summary
