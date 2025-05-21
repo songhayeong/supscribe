@@ -107,7 +107,7 @@ if args.model_type == 'tabvae':
 elif args.model_type == 'attention':
     from attn_analysis_model.train.evaulate import evaluate
     feature_names = train_dataset.cat_cols
-    test_metrics = evaluate(model, test_loader, device, feature_names=feature_names)
+    test_metrics = evaluate(model, test_loader, device)
     print("Test:", test_metrics)
 
 # --------------------------

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from attn_analysis_model.model.custom_transformer_encoder import CustomTransformerEncoderLayer
 
 
 class AttentionClassifier(nn.Module):
@@ -10,14 +11,15 @@ class AttentionClassifier(nn.Module):
             nn.Embedding(dim, embed_dim) for dim in cat_dims
         ])
 
-        encoder_layer = nn.TransformerEncoderLayer(
+        # ← Custom 레이어로 변경
+        encoder_layer = CustomTransformerEncoderLayer(
             d_model=embed_dim,
             nhead=num_heads,
             batch_first=True
         )
         self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
-        self.attn_scores = []  # for visualization hook
+        self.attn_scores = []
         self._register_hooks()
 
         total_cat_dim = len(cat_dims) * embed_dim
@@ -34,16 +36,17 @@ class AttentionClassifier(nn.Module):
 
     def _register_hooks(self):
         def hook(module, input, output):
-            if hasattr(module, 'self_attn') and hasattr(module.self_attn, 'attn_output_weights'):
-                self.attn_scores.append(module.self_attn.attn_output_weights.detach().cpu())
+            if hasattr(module, 'attn_output_weights') and module.attn_output_weights is not None:
+                self.attn_scores.append(module.attn_output_weights.detach().cpu())
+
         for layer in self.transformer.layers:
             layer.register_forward_hook(hook)
 
     def forward(self, x_cat, x_num=None):
         self.attn_scores = []
         x_cat_embed = torch.stack([emb(x_cat[:, i]) for i, emb in enumerate(self.cat_embeds)], dim=1)
-        x_cat_transformed = self.transformer(x_cat_embed)  # [B, T, D]
-        x_cat_flat = x_cat_transformed.flatten(start_dim=1)  # [B, T*D]
+        x_cat_transformed = self.transformer(x_cat_embed)
+        x_cat_flat = x_cat_transformed.flatten(start_dim=1)
 
         if x_num is not None:
             x = torch.cat([x_cat_flat, x_num], dim=1)
