@@ -33,7 +33,6 @@ def train_epoch(model, dataloader, optimizer, device='cpu'):
         y_prob.extend(probs.detach().cpu().numpy())
         y_pred.extend(preds.detach().cpu().numpy())
 
-
     return {
         "loss": total_loss / len(dataloader),
         "acc": accuracy_score(y_true, y_pred),

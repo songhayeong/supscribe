@@ -105,7 +105,7 @@ if args.model_type == 'tabvae':
     logger.log_metrics(cfg['training']['num_epochs'], test_metrics, prefix="test")
 
 elif args.model_type == 'attention':
-    from attn_analysis_model.train.evaulate import evaluate
+    from attn_analysis_model.train.evaluate import evaluate
     feature_names = train_dataset.cat_cols
     test_metrics = evaluate(model, test_loader, device)
     print("Test:", test_metrics)

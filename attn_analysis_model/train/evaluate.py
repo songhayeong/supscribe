@@ -39,24 +39,23 @@ def evaluate(model, dataloader, device='cpu'):
                 if model.attn_scores:
                     print("[DEBUG] attn_scores[0] shape:", model.attn_scores[0].shape)
                 if attn_scores:
-                    attn = attn_scores[0]
-                    head = attn[0, 0]
+                    attn = attn_scores[0]                # [B, H, T, T]
+                    head_avg = attn[0].mean(dim=0)       # [T, T] 평균
 
                     plt.figure(figsize=(20, 18))
-                    sns.heatmap(head, cmap="viridis",
+                    sns.heatmap(head_avg, cmap="viridis",
                                 xticklabels=feature_names if feature_names else None,
                                 yticklabels=feature_names if feature_names else None,
                                 cbar_kws={'shrink': 0.8})
-                    plt.title("Attention Map: Layer 1, Head 1 (First Batch)", fontsize=24)
+                    plt.title("Attention Map: Layer 1, All Heads Avg (First Batch)", fontsize=24)
                     plt.xticks(rotation=90, fontsize=11)
                     plt.yticks(fontsize=11)
                     plt.tight_layout()
                     plt.show()
 
             if model.attn_scores:
-                print(f"[DEBUG] attn_scores[0].shape: {model.attn_scores[0].shape}")
-                attn = model.attn_scores[0]
-                attn_avg_heads = attn.mean(dim=1)
+                attn = model.attn_scores[0]              # [B, H, T, T]
+                attn_avg_heads = attn.mean(dim=1)        # 평균 over heads → [B, T, T]
 
                 batch_start_idx = idx * dataloader.batch_size
                 for i in range(attn_avg_heads.size(0)):
